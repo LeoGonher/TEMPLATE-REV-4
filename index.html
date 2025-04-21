@@ -95,13 +95,13 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Utilidad para inputs
+    // Aplicar estilo a los inputs
     const inputs = document.querySelectorAll('.input');
     inputs.forEach(input => {
       input.classList.add('border', 'border-gray-300', 'rounded', 'px-3', 'py-2', 'w-full');
     });
 
-    // Conexión con Google Apps Script (URL actualizada)
+    // URL de Apps Script (actualizada)
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyoKHOkmLsbzPN78APHNpmv37Qn41BspDlagevPoo0Yhw2pYYJGy-h2VSHcVJ6YeH5MZg/exec';
 
     document.getElementById('customerForm').addEventListener('submit', function(event) {
@@ -110,20 +110,20 @@
       const form = event.target;
       const formData = new FormData(form);
 
-      // Validar campos vacíos
-      for (let [key, value] of formData.entries()) {
-        if (!value.trim()) {
-          alert(`Por favor completa el campo: ${key}`);
-          return;
-        }
-      }
+      const plainFormData = Object.fromEntries(formData.entries());
+      const jsonData = JSON.stringify(plainFormData);
 
-      // Enviar datos al Google Apps Script
       fetch(scriptURL, {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonData
       })
-      .then(response => response.text())
+      .then(response => {
+        if (!response.ok) throw new Error('Error en la respuesta del servidor');
+        return response.text();
+      })
       .then(result => {
         alert('Formulario enviado exitosamente a Google Sheets.');
         form.reset();
